@@ -47,37 +47,39 @@ public class RegisterActivity extends AppCompatActivity {
         getView();
         teleManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
         btnTurnBack.setOnClickListener(v -> finish());
-        btnRegister.setOnClickListener(v -> {
-            if(validate()){
-                String userName = edtRegisterUserName.getText().toString();
-                String password = edtRegisterPassword.getText().toString();
-
-                GameApi.GAME_API.rigisterUser("1",userName,password)
-                        .enqueue(new Callback<BaseJson>() {
-                            @Override
-                            public void onResponse(Call<BaseJson> call, Response<BaseJson> response) {
-                                BaseJson baseJson = response.body();
-                                if(baseJson.getError().getCode() == 200){
-                                    Toast.makeText(RegisterActivity.this, baseJson.getError().getMessage(), Toast.LENGTH_SHORT).show();
-                                }else if(baseJson.getError().getCode() == 400){
-                                    Toast.makeText(RegisterActivity.this, baseJson.getError().getMessage(), Toast.LENGTH_SHORT).show();
-                                }
-                                Toast.makeText(RegisterActivity.this, baseJson.getError().getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onFailure(Call<BaseJson> call, Throwable t) {
-                                Toast.makeText(RegisterActivity.this, "Lỗi không xác định", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-            }
-        });
-
+        btnRegister.setOnClickListener(v -> register());
         imgbRegisterFb.setOnClickListener(v -> loginGuest());
         imgbRegisterGg.setOnClickListener(v -> loginGuest());
         imgbRegisterLogo.setOnClickListener(v -> loginGuest());
 
     }
+
+    private void register() {
+        if(validate()){
+            String userName = edtRegisterUserName.getText().toString();
+            String password = edtRegisterPassword.getText().toString();
+
+            GameApi.GAME_API.rigisterUser("1",userName,password)
+                    .enqueue(new Callback<BaseJson>() {
+                        @Override
+                        public void onResponse(Call<BaseJson> call, Response<BaseJson> response) {
+                            BaseJson baseJson = response.body();
+                            if(baseJson.getError().getCode() == 200){
+                                Toast.makeText(RegisterActivity.this, baseJson.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                            }else if(baseJson.getError().getCode() == 400){
+                                Toast.makeText(RegisterActivity.this, baseJson.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                            Toast.makeText(RegisterActivity.this, baseJson.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onFailure(Call<BaseJson> call, Throwable t) {
+                            Toast.makeText(RegisterActivity.this, "Lỗi không xác định", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
+
     private void loginGuest() {
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
 

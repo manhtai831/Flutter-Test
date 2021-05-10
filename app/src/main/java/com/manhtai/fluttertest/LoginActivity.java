@@ -53,44 +53,35 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void clickView() {
-        btnLogin.setOnClickListener(v -> {
-            if (validate() == null) {
-
-                String userName = edtLoginUserName.getText().toString();
-                String password = edtLoginPassword.getText().toString();
-
-                Log.d(TAG, "clickView: " + deviceId);
-                String appKey = String.valueOf(new Random().nextInt());
-                GameApi.GAME_API.loginUser("1", userName, password, appKey, deviceId)
-                        .enqueue(new Callback<BaseJson>() {
-                            @Override
-                            public void onResponse(Call<BaseJson> call, Response<BaseJson> response) {
-                                NotificationE(response.body());
-                            }
-
-                            @Override
-                            public void onFailure(Call<BaseJson> call, Throwable t) {
-                                Toast.makeText(LoginActivity.this, "Lỗi không xác định", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-            } else {
-                tvLoginError.setText(validate());
-            }
-        });
-
-        imgbLoginFb.setOnClickListener(v -> {
-            loginGuest();
-        });
-        imgbLoginGg.setOnClickListener(v -> {
-            loginGuest();
-        });
-        imgbLoginLogo.setOnClickListener(v -> {
-            loginGuest();
-        });
-
+        btnLogin.setOnClickListener(v -> login());
+        imgbLoginFb.setOnClickListener(v -> loginGuest());
+        imgbLoginGg.setOnClickListener(v -> loginGuest());
+        imgbLoginLogo.setOnClickListener(v -> loginGuest());
         btnRegister.setOnClickListener(v -> {
             startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
         });
+    }
+
+    private void login() {
+        if (validate() == null) {
+            String userName = edtLoginUserName.getText().toString();
+            String password = edtLoginPassword.getText().toString();
+            String appKey = String.valueOf(System.currentTimeMillis());
+            GameApi.GAME_API.loginUser("1", userName, password, appKey, deviceId)
+                    .enqueue(new Callback<BaseJson>() {
+                        @Override
+                        public void onResponse(Call<BaseJson> call, Response<BaseJson> response) {
+                            NotificationE(response.body());
+                        }
+
+                        @Override
+                        public void onFailure(Call<BaseJson> call, Throwable t) {
+                            Toast.makeText(LoginActivity.this, "Lỗi không xác định", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        } else {
+            tvLoginError.setText(validate());
+        }
     }
 
     private void loginGuest() {
@@ -108,9 +99,6 @@ public class LoginActivity extends AppCompatActivity {
                 deviceId = teleManager.getDeviceId();
             }
         }
-
-
-        Log.d(TAG, "clickView: " + deviceId);
         GameApi.GAME_API.loginUserGuest("1", String.valueOf(System.currentTimeMillis()),
                 String.valueOf(System.currentTimeMillis()), deviceId).enqueue(new Callback<BaseJson>() {
             @Override
