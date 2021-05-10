@@ -1,8 +1,14 @@
 package com.manhtai.fluttertest;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -30,7 +36,8 @@ public class RegisterActivity extends AppCompatActivity {
     private ImageButton imgbRegisterGg;
     private ImageButton imgbRegisterFb;
 
-
+    TelephonyManager teleManager;
+    String deviceId = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +45,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         getView();
+        teleManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
         btnTurnBack.setOnClickListener(v -> finish());
         btnRegister.setOnClickListener(v -> {
             if(validate()){
@@ -62,6 +70,43 @@ public class RegisterActivity extends AppCompatActivity {
                                 Toast.makeText(RegisterActivity.this, "Lỗi không xác định", Toast.LENGTH_SHORT).show();
                             }
                         });
+            }
+        });
+
+        imgbRegisterFb.setOnClickListener(v -> loginGuest());
+        imgbRegisterGg.setOnClickListener(v -> loginGuest());
+        imgbRegisterLogo.setOnClickListener(v -> loginGuest());
+
+    }
+    private void loginGuest() {
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, 500);
+        } else {
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                deviceId = "Đây là android 10 vì thế k thể lấy được deviceID";
+            }else if (Build.VERSION.SDK_INT >= 26) {
+                deviceId = teleManager.getImei();
+
+            }else {
+                deviceId = teleManager.getDeviceId();
+            }
+        }
+
+
+        Log.d(TAG, "clickView: " + deviceId);
+        GameApi.GAME_API.loginUserGuest("1", String.valueOf(System.currentTimeMillis()),
+                String.valueOf(System.currentTimeMillis()), deviceId).enqueue(new Callback<BaseJson>() {
+            @Override
+            public void onResponse(Call<BaseJson> call, Response<BaseJson> response) {
+                NotificationE(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<BaseJson> call, Throwable t) {
+                Log.d(TAG, "onFailure: " + t);
+                Toast.makeText(RegisterActivity.this, "Lỗi không xác định", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -93,6 +138,31 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 500 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                deviceId = "Đây là android 10 vì thế k thể lấy được deviceID";
+            }else  if (Build.VERSION.SDK_INT >= 26) {
+                deviceId = teleManager.getImei();
+
+            }  else {
+                deviceId = teleManager.getDeviceId();
+            }
+        }
+    }
+    private void NotificationE(BaseJson baseJson) {
+        Log.d(TAG, "NotificationE:" + baseJson.getRequestId());
+        if (baseJson.getError().getCode() == 200) {
+            //Giả định 200 là mã đăng nhập thành công
+            Toast.makeText(RegisterActivity.this, baseJson.getError().getMessage(), Toast.LENGTH_SHORT).show();
+        } else if (baseJson.getError().getCode() == 400) {
+            //Giả định 200 là mã đăng nhập không thành công
+            Toast.makeText(RegisterActivity.this, baseJson.getError().getMessage(), Toast.LENGTH_SHORT).show();
+        }
+        Toast.makeText(RegisterActivity.this, baseJson.getError().getMessage(), Toast.LENGTH_SHORT).show();
+    }
     private void getView() {
         edtRegisterUserName = findViewById(R.id.edt_register_user_name);
         tvRegisterError1 = findViewById(R.id.tv_register_error_1);
