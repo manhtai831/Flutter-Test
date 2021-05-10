@@ -8,8 +8,12 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
+import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.Headers;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 
 public interface GameApi {
@@ -20,27 +24,21 @@ public interface GameApi {
 
 GameApi GAME_API =new Retrofit.Builder()
         .baseUrl(baseUrl)
+        .addConverterFactory(ScalarsConverterFactory.create())
         .addConverterFactory(GsonConverterFactory.create(GSON))
         .build()
         .create(GameApi.class);
-    @FormUrlEncoded
+
+    @Headers("Content-Type: application/json")
     @POST("user/register")
-    Call<BaseJson> rigisterUser(@Field("gameId") String gameId,
-                                @Field("userName") String userName,
-                                @Field("password") String password);
-    @FormUrlEncoded
+    Call<BaseJson> rigisterUser(@Body String body);
+
+    @Headers("Content-Type: application/json")
      @POST("user/login/skw")
-    Call<BaseJson> loginUser(@Field("gameId") String gameId,
-                                 @Field("userName") String userName,
-                                 @Field("password") String password,
-                                 @Field("appKey") String appKey,
-                                 @Field("deviceInfo") String deviceInfo
-                                 );
-    @FormUrlEncoded
+    Call<BaseJson> loginUser(@Body String body);
+
+    @Headers("Content-Type: application/json")
      @POST("user/login/guest")
-    Call<BaseJson> loginUserGuest(@Field("gameId") String gameId,
-                                 @Field("guestId") String guestId,
-                                 @Field("appKey") String appKey,
-                                 @Field("deviceInfo") String deviceInfo);
+    Call<BaseJson> loginUserGuest(@Body String body);
 
 }

@@ -16,8 +16,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.gson.JsonObject;
 import com.manhtai.fluttertest.itf.GameApi;
 import com.manhtai.fluttertest.model.BaseJson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -59,7 +63,16 @@ public class RegisterActivity extends AppCompatActivity {
             String userName = edtRegisterUserName.getText().toString();
             String password = edtRegisterPassword.getText().toString();
 
-            GameApi.GAME_API.rigisterUser("1",userName,password)
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("gameId","1");
+                jsonObject.put("userName",userName);
+                jsonObject.put("password",password);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Log.d(TAG, "register: " + jsonObject.toString());
+            GameApi.GAME_API.rigisterUser(jsonObject.toString())
                     .enqueue(new Callback<BaseJson>() {
                         @Override
                         public void onResponse(Call<BaseJson> call, Response<BaseJson> response) {
@@ -74,6 +87,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                         @Override
                         public void onFailure(Call<BaseJson> call, Throwable t) {
+                            Log.d(TAG, "onFailure: " + t);
                             Toast.makeText(RegisterActivity.this, "Lỗi không xác định", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -96,10 +110,18 @@ public class RegisterActivity extends AppCompatActivity {
             }
         }
 
+        JSONObject jsonObject = new JSONObject();
 
+        try {
+            jsonObject.put("gameId","1");
+            jsonObject.put("guestId", "user" + String.valueOf(System.currentTimeMillis()));
+            jsonObject.put("appKey", String.valueOf(System.currentTimeMillis()));
+            jsonObject.put("deviceInfo",deviceId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         Log.d(TAG, "clickView: " + deviceId);
-        GameApi.GAME_API.loginUserGuest("1", String.valueOf(System.currentTimeMillis()),
-                String.valueOf(System.currentTimeMillis()), deviceId).enqueue(new Callback<BaseJson>() {
+        GameApi.GAME_API.loginUserGuest(jsonObject.toString()).enqueue(new Callback<BaseJson>() {
             @Override
             public void onResponse(Call<BaseJson> call, Response<BaseJson> response) {
                 NotificationE(response.body());

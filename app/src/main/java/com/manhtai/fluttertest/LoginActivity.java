@@ -22,6 +22,9 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.manhtai.fluttertest.itf.GameApi;
 import com.manhtai.fluttertest.model.BaseJson;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Random;
 
 import okhttp3.ResponseBody;
@@ -67,7 +70,17 @@ public class LoginActivity extends AppCompatActivity {
             String userName = edtLoginUserName.getText().toString();
             String password = edtLoginPassword.getText().toString();
             String appKey = String.valueOf(System.currentTimeMillis());
-            GameApi.GAME_API.loginUser("1", userName, password, appKey, deviceId)
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("gameId", "1");
+                jsonObject.put("userName", userName);
+                jsonObject.put("password", password);
+                jsonObject.put("appKey", appKey);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            GameApi.GAME_API.loginUser(jsonObject.toString())
                     .enqueue(new Callback<BaseJson>() {
                         @Override
                         public void onResponse(Call<BaseJson> call, Response<BaseJson> response) {
@@ -99,8 +112,16 @@ public class LoginActivity extends AppCompatActivity {
                 deviceId = teleManager.getDeviceId();
             }
         }
-        GameApi.GAME_API.loginUserGuest("1", String.valueOf(System.currentTimeMillis()),
-                String.valueOf(System.currentTimeMillis()), deviceId).enqueue(new Callback<BaseJson>() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("gameId","1");
+            jsonObject.put("guestId", "user" + String.valueOf(System.currentTimeMillis()));
+            jsonObject.put("appKey", String.valueOf(System.currentTimeMillis()));
+            jsonObject.put("deviceInfo",deviceId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        GameApi.GAME_API.loginUserGuest(jsonObject.toString()).enqueue(new Callback<BaseJson>() {
             @Override
             public void onResponse(Call<BaseJson> call, Response<BaseJson> response) {
                 NotificationE(response.body());
