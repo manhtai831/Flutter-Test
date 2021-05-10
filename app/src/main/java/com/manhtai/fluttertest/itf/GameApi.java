@@ -31,7 +31,7 @@ GameApi GAME_API =new Retrofit.Builder()
 
     @Headers("Content-Type: application/json")
     @POST("user/register")
-    Call<BaseJson> rigisterUser(@Body String body);
+    Call<BaseJson> registerUser(@Body String body);
 
     @Headers("Content-Type: application/json")
      @POST("user/login/skw")

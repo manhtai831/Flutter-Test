@@ -72,7 +72,7 @@ public class RegisterActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             Log.d(TAG, "register: " + jsonObject.toString());
-            GameApi.GAME_API.rigisterUser(jsonObject.toString())
+            GameApi.GAME_API.registerUser(jsonObject.toString())
                     .enqueue(new Callback<BaseJson>() {
                         @Override
                         public void onResponse(Call<BaseJson> call, Response<BaseJson> response) {
